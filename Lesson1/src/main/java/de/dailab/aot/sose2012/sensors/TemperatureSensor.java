@@ -12,6 +12,7 @@ import java.util.Set;
 
 import de.dailab.aot.sose2012.effectors.Heating;
 import de.dailab.aot.sose2012.ontology.Temperature;
+import de.dailab.aot.sose2012.user.CurrentTemperature;
 import de.dailab.jiactng.agentcore.AbstractAgentBean;
 import de.dailab.jiactng.agentcore.SimpleAgentNode;
 import de.dailab.jiactng.agentcore.action.Action;
@@ -36,7 +37,7 @@ public final class TemperatureSensor extends AbstractAgentBean implements Result
 	private Boolean stateWindow = Window.INITIAL;
 	private Integer stateHeating = Heating.INITIAL;
 	private TemperatureInformation frame = null;
-
+	
 
 	private final Comparator<Temperature> comparator = new Comparator<Temperature>() {
 		@Override
@@ -154,6 +155,11 @@ public final class TemperatureSensor extends AbstractAgentBean implements Result
 			final Temperature t = new Temperature(value);
 
 			this.memory.write(t);
+			
+			final Action temperature = this.retrieveAction(CurrentTemperature.ACTION_SET_TEMPERATURE);
+			if (temperature != null) {
+				this.invoke(temperature, new Serializable[] {t}, this);
+			}
 
 			try {
 				this.logTemperature(value, this.stateHeating, this.stateWindow, delta);

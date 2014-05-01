@@ -31,6 +31,7 @@
 					<property name="logLevel" value="info" />
 				</bean>
 				<bean name="Heating" class="de.dailab.aot.sose2012.effectors.Heating" />
+				<bean name="CurrentTemperature" class="de.dailab.aot.sose2012.user.CurrentTemperature" />
 			</list>
 		</property>
 	</bean>

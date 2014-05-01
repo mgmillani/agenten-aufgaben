@@ -1,8 +1,15 @@
 package de.dailab.aot.sose2012.user;
 
-import de.dailab.jiactng.agentcore.AbstractAgentBean;
+import java.io.Serializable;
 
-public final class HeatingControl extends AbstractAgentBean {
+import de.dailab.aot.sose2012.effectors.Heating;
+import de.dailab.aot.sose2012.sensors.Window;
+import de.dailab.jiactng.agentcore.AbstractAgentBean;
+import de.dailab.jiactng.agentcore.action.Action;
+import de.dailab.jiactng.agentcore.action.ActionResult;
+import de.dailab.jiactng.agentcore.environment.ResultReceiver;
+
+public final class HeatingControl extends AbstractAgentBean implements ResultReceiver {
 
 	/*@Override
 	public void doStart() throws Exception {
@@ -12,5 +19,69 @@ public final class HeatingControl extends AbstractAgentBean {
 	@Override
 	public void doStop() throws Exception {
 	}*/
+	
+	protected Double temperature   = null;
+	protected Integer stateHeating = Heating.INITIAL;
+	protected Boolean stateWindow  = Window.INITIAL;
+	
+	@Override
+	public void receiveResult(final ActionResult result) {
+
+		final String name = result.getAction().getName();
+		if (Heating.ACTION_GET_HEATING_STATE.equals(name)) {
+			try {
+				this.stateHeating = (Integer) result.getResults()[0];
+			}
+			catch (final Exception e) {
+				this.log.error("could not update heating state: " + e.getMessage());
+			}
+		}
+		else if (Window.ACTION_GET_WINDOW_STATE.equals(name)) {
+			try {
+				this.stateWindow = (Boolean) result.getResults()[0];
+			}
+			catch (final Exception e) {
+				this.log.error("could not update window state: " + e.getMessage());
+			}
+		}
+		else if (CurrentTemperature.ACTION_GET_TEMPERATURE.equals(name)){
+			try {
+				this.temperature = (Double) result.getResults()[0];
+			}
+			catch (final Exception e) {
+				this.log.error("could not update temperature: " + e.getMessage());
+			}
+		}
+	}
+	
+	protected void updateVariables(){
+		final Action heating = this.retrieveAction(Heating.ACTION_GET_HEATING_STATE);
+		if (heating != null) {
+			this.invoke(heating, new Serializable[] {}, this);
+		}
+		final Action window = this.retrieveAction(Window.ACTION_GET_WINDOW_STATE);
+		if (window != null) {
+			this.invoke(window, new Serializable[] {}, this);
+		}
+		final Action temperature = this.retrieveAction(CurrentTemperature.ACTION_GET_TEMPERATURE);
+		if (temperature != null) {
+			this.invoke(temperature, new Serializable[] {}, this);
+		}
+	}
+	
+	@Override
+	public void execute(){
+		this.updateVariables();
+		
+		this.log.info("Temperature: " + this.temperature);
+		this.log.info("Window:      " + this.stateWindow);
+		this.log.info("Heating:     " + this.stateHeating);
+		
+		//Burn, baby, burn!
+		final Action heating = this.retrieveAction(Heating.ACTION_UPDATE_STATE);
+		if (heating != null) {
+			this.invoke(heating, new Serializable[] {5}, this);
+		}
+	}
 
 }
