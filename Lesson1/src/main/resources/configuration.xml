@@ -22,6 +22,10 @@
 					<property name="executeInterval" value="1000" />
 					<property name="logLevel" value="info" />
 				</bean>
+				<bean name="HeatingControl" class="de.dailab.aot.sose2012.user.HeatingControl">
+					<property name="executeInterval" value="1000" />
+					<property name="logLevel" value="info" />
+				</bean>
 				<bean name="Window" class="de.dailab.aot.sose2012.sensors.Window">
 					<property name="executeInterval" value="4000" />
 					<property name="logLevel" value="info" />
