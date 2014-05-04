@@ -3,3 +3,4 @@
 /*.log*
 /target/
 /.settings
+/temperatures.csv
