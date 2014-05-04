@@ -101,7 +101,7 @@ public final class HeatingControl extends AbstractAgentBean implements ResultRec
 				
 				targetHeating = 21 + 0.07*w*(nextTemperature - TMIN) - nextTemperature;
 				targetHeating = targetHeating / (0.11 * (TMAX-nextTemperature));
-				adjustedHeating = targetHeating.intValue();
+				adjustedHeating = (int) Math.round(targetHeating);
 				
 				if(adjustedHeating < 0 || adjustedHeating > 5) {
 					adjustedHeating = adjustedHeating > 5 ? 5 : 0;
