@@ -3,6 +3,7 @@ package de.dailab.aot.sose2012.user;
 import java.io.Serializable;
 
 import de.dailab.aot.sose2012.effectors.Heating;
+import de.dailab.aot.sose2012.sensors.TemperatureSensor;
 import de.dailab.aot.sose2012.sensors.Window;
 import de.dailab.jiactng.agentcore.AbstractAgentBean;
 import de.dailab.jiactng.agentcore.action.Action;
@@ -80,7 +81,34 @@ public final class HeatingControl extends AbstractAgentBean implements ResultRec
 		//Burn, baby, burn!
 		final Action heating = this.retrieveAction(Heating.ACTION_UPDATE_STATE);
 		if (heating != null) {
-			this.invoke(heating, new Serializable[] {5}, this);
+			
+			// default heating setting
+			int adjustedHeating = 3;
+			
+			if(this.temperature != null) {
+				
+				final Double TMIN = 0.0;
+				final Double TMAX = 30.0;
+				
+				// calculates the next probable temperature
+				Integer w = this.stateWindow ? 2 : 1;
+				Double l = -0.07 * w * (this.temperature - TMIN);
+				Double g = 0.11 * this.stateHeating * (TMAX - this.temperature);
+				Double nextTemperature = l + g + this.temperature;
+				
+				// calculates the heating setting in order to achieve 21 degrees
+				Double targetHeating;
+				
+				targetHeating = 21 + 0.07*w*(nextTemperature - TMIN) - nextTemperature;
+				targetHeating = targetHeating / (0.11 * (TMAX-nextTemperature));
+				adjustedHeating = targetHeating.intValue();
+				
+				if(adjustedHeating < 0 || adjustedHeating > 5) {
+					adjustedHeating = adjustedHeating > 5 ? 5 : 0;
+				}
+			}
+			
+			this.invoke(heating, new Serializable[] {adjustedHeating}, this);
 		}
 	}
 
